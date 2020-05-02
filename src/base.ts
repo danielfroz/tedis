@@ -27,6 +27,7 @@ interface Result {
 
 interface TedisHandlers {
 	connect?: () => void
+	message?: (message: any) => void
 	error?: (err: Error) => void;
 	timeout?: () => void
 	close?: (error: boolean) => void
@@ -45,6 +46,7 @@ export interface IBase {
 
 export class Base implements IBase {
 	private debug = false
+	private name?:string
 	private socket?: Socket | TLSSocket
 	private handlers?: TedisHandlers
 	private commands = new Array<Command>()
@@ -99,6 +101,9 @@ export class Base implements IBase {
 	 */
 	public connect(params: TedisConnectParams): Promise<void> {
 		return new Promise(async (resolve, reject) => {
+			if(params.name) {
+				this.name = params.name
+			}
 
 			// in case that URL is passed along
 			// let's use it instead of individual host, port, password, etc...
@@ -168,20 +173,41 @@ export class Base implements IBase {
 			});
 			this.socket.on("data", async (buffer:Buffer) => {
 				if(this.debug) {
-					console.log('Tedis: socket> data arrived: buffer: %o', buffer)
+					console.log('Tedis:socket%s> data arrived: buffer: %o',
+						this.name ? ':'+this.name: '', buffer)
 				}
 	
 				this.parser.parse(buffer);
-	
+
 				while(true) {
+					if(this.commands.length === 0 && this.results.length > 0) {
+						// supporting pub sub...
+						if(this.handlers && this.handlers.message) {
+							// result.data returned... passing it through Tedis.message handler
+							// likely error handler not needed in this case... maybe NetworkError
+							const result = this.results[0]
+							this.handlers.message(result.data)
+
+							this.results.shift()
+							
+							if(this.results.length === 0) {
+								this.parser.clear()
+								break
+							}
+							else {
+								continue
+							}
+						}
+					}
+
 					const command = this.commands[0]
 					const result = this.results[0]
 					if(!command || !result) {
-						// try again after 100ms... so prevent CPU clogging
+						// try again after 100ms... prevent CPU clogging
 						await sleep(100)
 						continue
 					}
-	
+
 					command.callback({ 
 						error: result.error,
 						data: result.data, 
@@ -192,7 +218,7 @@ export class Base implements IBase {
 					this.commands.shift()
 					this.results.shift()
 	
-					if(this.commands.length === 0 && this.results.length === 0) {
+					if(this.results.length === 0) {
 						// ensures GC()...
 						this.parser.clear()
 						break
@@ -200,7 +226,7 @@ export class Base implements IBase {
 				}
 	
 				if(this.debug) {
-					console.log('Tedis: <socket')
+					console.log('Tedis:<socket%s', this.name ? ':'+this.name: '')
 				}
 			});
 
@@ -264,6 +290,7 @@ export class Base implements IBase {
 	}
 
 	public on(event: "connect" | "timeout", listener: () => void): void;
+	public on(event: "message", listener: (message: any) => void): void
 	public on(event: "close", listener: (had_error: boolean) => void): void;
 	public on(event: "error", listener: (err: Error) => void): void;
 	public on(event: string, listener: (...args: any[]) => void): void {
@@ -273,6 +300,12 @@ export class Base implements IBase {
 					...this.handlers,
 					connect: listener
 				}: { connect: listener }
+				break;
+			case "message":
+				this.handlers = this.handlers ? {
+					...this.handlers,
+					message: listener
+				}: { message: listener }
 				break;
 			case "timeout":
 				this.handlers = this.handlers ? {

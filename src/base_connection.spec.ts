@@ -2,7 +2,7 @@ import net from 'net'
 import { expect } from 'chai'
 import { Tedis } from '.'
 
-describe('Base tedis connection', function() {
+describe('Base Connection tests', function() {
 	let tedis:Tedis
 
 	before(function() {

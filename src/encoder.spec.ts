@@ -7,7 +7,7 @@ interface Encode {
 	output: string;
 }
 
-describe("Protocol.encode", () => {
+describe("Encoder tests", () => {
 	const encoder = new Encoder()
 	const mock: Encode[] = [
 		{

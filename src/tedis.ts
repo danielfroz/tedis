@@ -3,9 +3,14 @@ import { Array2Object } from "./tools";
 
 export interface TedisConnectParams {
 	debug?: boolean
+	/**
+	 * Tedis name identifier
+	 */
+	name?: string
 	url?: string
 	/**
-	 * host is mandatory; however, it may be passed using url...
+	 * host is mandatory; however, it may be passed using url... 
+	 * so it is optional from Params' perspective
 	 */
 	host?: string;
 	port?: number|string;
@@ -23,7 +28,6 @@ export interface TedisConnectParams {
  * 
  * Tedis tedis = new Tedis()
  * tedis.connect({ url: 'redis://user@pass:localhost' })
- * tedis.ping()
  * tedis.close()
  */
 export class Tedis extends Base {
