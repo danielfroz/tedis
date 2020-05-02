@@ -1,7 +1,6 @@
 # Tedis
 
-Fork of Tedis' project (https://github.com/silkjs/tedis.git).
-Created and maintained by Daniel Froz <daniel.froz at actt.io>
+Fork of Tedis' project (https://github.com/silkjs/tedis.git)
 
 ## Motivation
 
@@ -9,7 +8,7 @@ Currently using ioredis where memory leaks is causing me problems; needed a solu
 
 Optimized for production based on my own experience and usage.
 
-Main goal is to make it production ready and ready to support Redis Streams. XREADGROUP and other commands supported already supported by tedis.command() method.
+Main goal is to make it production ready and ready for Redis Streams. XREADGROUP and other commands support is already done. Check tedis_command_xstreams.spec.ts.
 
 ## Documentation
 
