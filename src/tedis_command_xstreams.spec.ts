@@ -65,7 +65,7 @@ describe('Tedis commands xstreams', function () {
 	})
 
 	it('xreadgroup without message on queue; without block', async function() {
-		// just to guarantee that will take 200ms...
+		// just to guarantee that will handle less than 1 sec...
 		this.timeout(1 * 1000)
 		try {
 			await tedis.command('xreadgroup',
