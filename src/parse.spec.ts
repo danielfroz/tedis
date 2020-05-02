@@ -1,8 +1,5 @@
-import chai from 'chai'
+import { expect } from 'chai'
 import { Parser } from "./parser";
-
-chai.config.showDiff = true
-const expect = chai.expect
 
 describe("Parser test case", function () {
 	const results = new Array<any>()
