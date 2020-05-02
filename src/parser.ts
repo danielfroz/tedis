@@ -201,11 +201,11 @@ export class Parser {
 	 */
 	private _handleError(type: number): void {
 		const buffer = this.buffer!
-		const err = new errors.ParserError(
+		const err = new errors.TedisParserError(
 			'Protocol error, got ' + JSON.stringify(String.fromCharCode(type)) + ' as reply type byte',
 			buffer, this.offset
 		)
-		this.buffer = undefined
+		// this.buffer = undefined
 		if(this.handlers.fatal) {
 			this.handlers.fatal(err)
 		}
@@ -387,10 +387,10 @@ export class Parser {
 	private _parseError(): any {
 		let string = this._parseSimpleString()
 		if (string != null) {
-			return new errors.ReplyError(string.toString())
+			return new errors.TedisReplyError(string.toString())
 		}
 		else {
-			return new errors.ReplyError('Unknown error returned by REDIS')
+			return new errors.TedisReplyError('Unknown error returned by REDIS')
 		}
 	}
 

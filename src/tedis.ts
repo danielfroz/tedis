@@ -1,11 +1,14 @@
 import { Base } from "./base";
 import { Array2Object } from "./tools";
 
-export interface TedisParams {
+export interface TedisConnectParams {
 	debug?: boolean
 	url?: string
+	/**
+	 * host is mandatory; however, it may be passed using url...
+	 */
 	host?: string;
-	port?: number;
+	port?: number|string;
 	password?: string;
 	timeout?: number;
 	tls?: {
@@ -14,11 +17,16 @@ export interface TedisParams {
 	};
 }
 
+/**
+ * Tedis is more than just connect... so you may instanciate object and 
+ * handle connections later... may also try another server...
+ * 
+ * Tedis tedis = new Tedis()
+ * tedis.connect({ url: 'redis://user@pass:localhost' })
+ * tedis.ping()
+ * tedis.close()
+ */
 export class Tedis extends Base {
-	constructor(options?: TedisParams) {
-		super(options);
-	}
-
 	/*******************************************************************************************************
 	 * KEY *************************************************************************************************
 	 *******************************************************************************************************/

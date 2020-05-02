@@ -2,11 +2,11 @@ import { expect } from 'chai'
 import { Tedis } from './tedis'
 import { after, before } from 'mocha'
 
-describe('Tedis raw command tests', function () {
-	let tedis:Tedis
+describe('Tedis command tests', function () {
+	const tedis = new Tedis()
 
 	before(async function () {
-		tedis = new Tedis()
+		tedis.connect({ host: 'localhost' })
 	})
 	
 	after(async function () {

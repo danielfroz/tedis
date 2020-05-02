@@ -13,9 +13,8 @@ describe('Tedis commands xstreams', function () {
 	let tedis:Tedis
 
 	before(async function () {
-		tedis = new Tedis({
-			debug: false
-		})
+		tedis = new Tedis()
+		tedis.connect({ debug: false, host: 'localhost' })
 	})
 	
 	after(async function () {
@@ -65,13 +64,13 @@ describe('Tedis commands xstreams', function () {
 		expect(xread).to.deep.equal(expectedResult)
 	})
 
-	it('xreadgroup without message on queue', async function() {
+	it('xreadgroup without message on queue; without block', async function() {
 		// just to guarantee that will take 200ms...
 		this.timeout(1 * 1000)
 		try {
 			await tedis.command('xreadgroup',
 				'GROUP', consumerGroup, consumerName,
-				'BLOCK', '200',
+				'BLOCK', '1',
 				'COUNT', '1',
 				'STREAMS', stream, '>')
 		}

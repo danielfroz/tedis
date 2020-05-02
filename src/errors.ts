@@ -1,28 +1,70 @@
 import assert from 'assert'
 
-export class RedisError extends Error {
-	get name() {
-		return this.constructor.name
+export class TedisError extends Error {
+	constructor(message:string|Error|any) {
+		if(message) {	
+			if(message instanceof Error) {
+				super(message.message)
+				this.stack = message.stack
+			}
+			else {
+				if(typeof(message) === 'string') {
+					super(message)
+				}
+				else {
+					super(message.message || message.err)
+				}
+				Error.captureStackTrace(this, this.constructor)
+			}
+		}
+		this.name = 'TedisError'
 	}
 }
 
-export class ParserError extends RedisError {
+/**
+ * thrown during if Authentication fails
+ */
+export class TedisAuthError extends TedisError {
+	constructor(message?:any) {
+		super(message)
+		this.name = 'TedisAuthError'
+	}
+}
+
+export class TedisNetworkError extends TedisError {
+	constructor(message?:any) {
+		super(message)
+		this.name = 'TedisNetworkError'
+	}
+}
+
+export class TedisTimeoutError extends TedisNetworkError {
+	constructor(message?:any) {
+		super(message)
+		this.name = 'TedisTimeoutError'
+	}
+}
+
+export class TedisMessageError extends TedisError {
+	constructor(message?:any) {
+		super(message)
+		this.name = 'TedisMessageError'
+	}
+}
+
+export class TedisParserError extends TedisMessageError {
 	private _buffer:Buffer
 	private _offset:number
-	constructor(message: string, buffer: Buffer, offset: number) {
+
+	constructor(message: any, buffer: Buffer, offset: number) {		
+		super(message)
 		assert(buffer)
 		assert.strictEqual(typeof offset, 'number')
-
-		const tmp = Error.stackTraceLimit
-		Error.stackTraceLimit = 2
-		super(message)
-		Error.stackTraceLimit = tmp
 		this._offset = offset
 		this._buffer = buffer
+		this.name = 'TedisParserError'
 	}
-	get name() {
-		return this.constructor.name
-	}
+
 	get buffer() {
 		return this._buffer
 	}
@@ -31,26 +73,9 @@ export class ParserError extends RedisError {
 	}
 }
 
-export class ReplyError extends RedisError {
+export class TedisReplyError extends TedisMessageError {
 	constructor(message:string) {
-		const tmp = Error.stackTraceLimit
-		Error.stackTraceLimit = 2
 		super(message)
-		Error.stackTraceLimit = tmp
-	}
-	get name() {
-		return this.constructor.name
-	}
-}
-
-export class AbortError extends RedisError {
-	get name() {
-		return this.constructor.name
-	}
-}
-
-export class InterruptError extends AbortError {
-	get name() {
-		return this.constructor.name
+		this.name = 'ReplyError'
 	}
 }

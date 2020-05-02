@@ -1,3 +1,2 @@
 export * from './errors'
-export { Tedis } from "./tedis";
-export { TedisPool } from "./pool";
+export { Tedis, TedisConnectParams } from "./tedis"
