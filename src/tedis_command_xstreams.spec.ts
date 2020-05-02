@@ -2,7 +2,7 @@ import { expect } from 'chai'
 import { Tedis } from './tedis'
 import { after, before } from 'mocha'
 
-describe('Tedis commands xstreams', function () {
+describe('Tedis Streams tests', function () {
 	const event = {
 		id: '1',
 		author: { id: '1', name: 'Super User' }
