@@ -1,8 +1,12 @@
 import { Base } from "./base";
 import { Array2Object } from "./tools";
 
-export interface TedisConnectParams {
+export interface TedisConnectOptions {
 	debug?: boolean
+	errorOnTimeout?: boolean
+}
+
+export interface TedisConnectParams {
 	/**
 	 * Tedis name identifier
 	 */
@@ -15,6 +19,7 @@ export interface TedisConnectParams {
 	host?: string;
 	port?: number|string;
 	password?: string;
+	options?: TedisConnectOptions
 	timeout?: number;
 	tls?: {
 		key: Buffer;

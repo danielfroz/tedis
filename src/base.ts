@@ -1,10 +1,10 @@
 import { createConnection, Socket } from "net";
 import { connect, TLSSocket } from "tls";
 // core
-import { TedisConnectParams } from './tedis'
+import { TedisConnectParams, TedisConnectOptions } from './tedis'
 import { Encoder } from "./encoder"
 import { Parser } from './parser'
-import { TedisNetworkError, TedisError, TedisAuthError } from "./errors";
+import { TedisNetworkError, TedisError, TedisAuthError, TedisTimeoutError } from "./errors";
 
 interface CommandCallbackParams {
 	error:any
@@ -45,17 +45,23 @@ export interface IBase {
 }
 
 export class Base implements IBase {
-	private debug = false
-	private name?:string
-	private socket?: Socket | TLSSocket
-	private handlers?: TedisHandlers
 	private commands = new Array<Command>()
 	private results = new Array<Result>()
 	private encoder = new Encoder()
 	private parser:Parser
+	private name?:string
+	private socket?: Socket | TLSSocket
+	private handlers?: TedisHandlers
+	private options: TedisConnectOptions
 
 	constructor() {
 		const results = this.results
+
+		// default options
+		this.options = {
+			debug: false,
+			errorOnTimeout: false
+		}
 
 		// Parser handlers are in fact command handlers.
 		this.parser = new Parser({
@@ -105,6 +111,10 @@ export class Base implements IBase {
 				this.name = params.name
 			}
 
+			if(params.options) {
+				this.options = { ...this.options, ...params.options }
+			}
+
 			// in case that URL is passed along
 			// let's use it instead of individual host, port, password, etc...
 			if(params.url) {
@@ -133,10 +143,6 @@ export class Base implements IBase {
 					host: params.host,
 					port: typeof(params.port) === 'string' ? parseInt(params.port): params.port,
 				});
-			}
-	
-			if(params.debug) {
-				this.debug = params.debug
 			}
 
 			if (typeof(params.timeout) === "number") {
@@ -172,7 +178,7 @@ export class Base implements IBase {
 				this.close()
 			});
 			this.socket.on("data", async (buffer:Buffer) => {
-				if(this.debug) {
+				if(this.options.debug) {
 					console.log('Tedis:socket%s> data arrived: buffer: %o',
 						this.name ? ':'+this.name: '', buffer)
 				}
@@ -225,7 +231,7 @@ export class Base implements IBase {
 					}
 				}
 	
-				if(this.debug) {
+				if(this.options.debug) {
 					console.log('Tedis:<socket%s', this.name ? ':'+this.name: '')
 				}
 			});
@@ -280,7 +286,12 @@ export class Base implements IBase {
 						return reject(params.error)
 					}
 					if(params.timedout) {
-						return reject('Command timedout')
+						if(this.options.errorOnTimeout) {
+							return reject(new TedisTimeoutError('Command timedout'))
+						}
+						else {
+							return resolve(undefined)
+						}
 					}
 					return resolve(params.data)
 				}

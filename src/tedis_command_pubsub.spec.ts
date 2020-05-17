@@ -10,7 +10,7 @@ describe('Base Pub Sub tests', function() {
 		const messages = new Array<any>()
 
 		const sub = new Tedis()
-		await sub.connect({ host: 'localhost', debug: false, name: 'sub' })
+		await sub.connect({ host: 'localhost', name: 'sub' })
 		sub.on('message', (message:any) => {
 			messages.push(message)
 		})
@@ -19,7 +19,7 @@ describe('Base Pub Sub tests', function() {
 		expect(subReply).to.deep.equal([ 'subscribe', channel, 1 ])
 
 		const pub = new Tedis()
-		await pub.connect({ host: 'localhost', debug: false, name: 'pub' })
+		await pub.connect({ host: 'localhost', name: 'pub' })
 		await pub.command('PUBLISH', channel, 'Hello from the other side')
 		await pub.command('PUBLISH', channel, 'Second message')
 		pub.close()
@@ -38,7 +38,7 @@ describe('Base Pub Sub tests', function() {
 
 	it('publish with no subscriber listening', async function() {
 		const pub = new Tedis()
-		await pub.connect({ host: 'localhost', debug: false, name: 'pub' })
+		await pub.connect({ host: 'localhost', name: 'pub' })
 		const reply = await pub.command('PUBLISH', channel, 'does it work?')
 		expect(reply).to.equal(0)
 		pub.close()
@@ -48,7 +48,7 @@ describe('Base Pub Sub tests', function() {
 		const messages = new Array<any>()
 
 		const sub = new Tedis()
-		await sub.connect({ host: 'localhost', debug: false, name: 'sub' })
+		await sub.connect({ host: 'localhost', name: 'sub' })
 		sub.on('message', (message:any) => {
 			messages.push(message)
 		})
@@ -58,7 +58,7 @@ describe('Base Pub Sub tests', function() {
 		expect(psubReply).to.deep.equal([ 'psubscribe', pattern, 1 ])
 
 		const pub = new Tedis()
-		await pub.connect({ host: 'localhost', debug: false, name: 'pub' })
+		await pub.connect({ host: 'localhost', name: 'pub' })
 		await pub.command('PUBLISH', channel, 'Hello from the other side')
 		await pub.command('PUBLISH', channel, 'Second message')
 		pub.close()

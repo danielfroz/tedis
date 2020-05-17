@@ -1,6 +1,7 @@
 import { expect } from 'chai'
 import { Tedis } from './tedis'
 import { after, before } from 'mocha'
+import { TedisNetworkError } from './errors'
 
 describe('Tedis Streams tests', function () {
 	const event = {
@@ -14,7 +15,7 @@ describe('Tedis Streams tests', function () {
 
 	before(async function () {
 		tedis = new Tedis()
-		tedis.connect({ debug: false, host: 'localhost' })
+		tedis.connect({ host: 'localhost' })
 	})
 	
 	after(async function () {
@@ -67,16 +68,12 @@ describe('Tedis Streams tests', function () {
 	it('xreadgroup without message on queue; without block', async function() {
 		// just to guarantee that will handle less than 1 sec...
 		this.timeout(1 * 1000)
-		try {
-			await tedis.command('xreadgroup',
-				'GROUP', consumerGroup, consumerName,
-				'BLOCK', '1',
-				'COUNT', '1',
-				'STREAMS', stream, '>')
-		}
-		catch(error) {
-			expect(error).to.equal('Command timedout')
-		}
+		const reply = await tedis.command('xreadgroup',
+			'GROUP', consumerGroup, consumerName,
+			'BLOCK', '100',
+			'COUNT', '1',
+			'STREAMS', stream, '>')
+		expect(reply).to.equal(undefined)
 	})
 
 	it('xgroup destroy', async function() {
