@@ -8,7 +8,8 @@ Currently using ioredis where memory leaks is causing me problems; needed a solu
 
 Optimized for production based on my own experience and usage.
 
-Main goal is to make it production ready and ready for Redis Streams. XREADGROUP and other commands support is already done. Check tedis_command_xstreams.spec.ts.
+Main goal is to make it production ready, supporting Redis PUB/SUB & Redis Streams. 
+Examples? Check tedis_command_pubsub.spec.ts & tedis_command_xstreams.spec.ts files.
 
 ## Documentation
 
