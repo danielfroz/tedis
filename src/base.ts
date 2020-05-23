@@ -206,6 +206,10 @@ export class Base implements IBase {
 						}
 					}
 
+					if(this.commands.length === 0 && this.results.length === 0) {
+						break
+					}
+
 					const command = this.commands[0]
 					const result = this.results[0]
 					if(!command || !result) {
@@ -229,7 +233,7 @@ export class Base implements IBase {
 						this.parser.clear()
 						break
 					}
-				}
+				} // !white
 	
 				if(this.options.debug) {
 					console.log('Tedis:<socket%s', this.name ? ':'+this.name: '')
@@ -296,7 +300,13 @@ export class Base implements IBase {
 					return resolve(params.data)
 				}
 			});
-			socket.write(this.encoder.encode(...parameters));
+			socket.write(
+				this.encoder.encode(...parameters),
+				(err) => {
+					if(err) {
+						return reject(new TedisNetworkError(err))
+					}
+				});
 		});
 	}
 
